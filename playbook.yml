@@ -1,0 +1,16 @@
+- name: Configure Webserver Inside container
+  hosts: container
+  tasks:
+  - name: Install httpd
+    package:
+            name: "httpd"
+            state: present
+
+  - name: "Copy web pages inside container"
+    copy:
+            src: "index.html"
+            dest: /var/www/html/index.html
+
+  - name: Start httpd service
+    command: "/usr/sbin/httpd" 
+

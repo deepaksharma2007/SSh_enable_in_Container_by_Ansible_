@@ -1,0 +1,69 @@
+- name: Configure the Docker 
+  hosts: localhost
+  tasks:
+      - name: "configure the repo of docker"
+        yum_repository:
+          name: docker
+          description: docker YUM repo
+          file: docker_repos
+          baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+          gpgcheck: no
+          enabled: yes
+
+      - name: "Install docker"
+        command: "yum install docker-ce --nobest -y"
+
+      - name: "start docker service" 
+        service:
+          name: "docker"
+          state: started
+          enabled: yes
+
+      - name: "install python"
+        package:
+            name: "python2"
+            state: present
+
+      - name: "Install docker SDK"
+        pip:
+            name: docker-py
+
+      - name: "Pull the docker Image"
+        docker_image:
+          name: deepak2007/centos_ssh
+          tag: latest
+          source: pull
+        
+      - name: " Create Persistent Volume of container"
+        file:
+            path: "/root/Task-14.2/volume"
+            state: directory
+
+          
+      - name: "Launch docker container and expose"
+        docker_container:
+            name: web
+            image: deepak2007/centos_ssh
+            state: started
+            detach: yes
+            interactive: yes
+            tty: yes
+            exposed_ports:
+            - "80"
+            ports: 
+            - "8080:80"
+            volumes:
+            - "/root/Task-14.2/volume:/var/www/html/"
+        register: cont
+
+      - debug:
+               msg: cont.container.NetworkSettings.IPAddress
+     
+      - name: "Updating inventory of container..."
+        blockinfile:
+          path: "/root/Task-14.2/inventory"
+          block: |
+            [container]
+             {{ cont.container.NetworkSettings.IPAddress }}  ansible_user=root ansible_ssh_pass=redhat  ansible_connection=ssh
+          marker: ""    
+
