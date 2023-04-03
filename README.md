@@ -23,5 +23,9 @@ By default docker container is isolated. So we cannot ssh the conainer. Ansible 
 
 #### Docker Image  :- https://hub.docker.com/r/deepak2007/centos_ssh
 
-#### For more detail ,please visit 
+If we are facing issue while creating docker image due to "Error: Failed to download metadata for repo 'appstream': Cannot prepare internal mirrorlist: No URLs in mirrorlist" ,then we need to add below commands in our Docker file 
 
+
+###### sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+###### sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+###### dnf distro-sync
